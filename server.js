@@ -82,17 +82,19 @@ app.all(/.*/, (req, res, next) => {
 
 app.use(globalError);
 
-const port = process.env.PORT || 8000;
-const server = app.listen(port, () =>
-  console.log(`The Server is Running on http://localhost:${port}`)
-);
+// const port = process.env.PORT || 8000;
+// const server = app.listen(port, () =>
+//   console.log(`The Server is Running on http://localhost:${port}`)
+// );
+
+module.exports = app;
 
 // Initialize Socket.IO
-require("./utils/socketHandler")(server);
+require("./utils/socketHandler")(app);
 
 // Handle Rejections outside Express
 process.on("unhandledRejection", (err) => {
   console.log(`UnhandleRejection Error: ${err.name} ${err.message}`);
 
-  server.close(() => process.exit(1));
+  app.close(() => process.exit(1));
 });
