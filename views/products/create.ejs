@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Product - TOPICO</title>
+    <link rel="stylesheet" href="/css/topico-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .form-container {
+            max-width: 900px;
+            margin: 40px auto;
+        }
+        .form-card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.05);
+            border: 1px solid #eaeaea;
+            overflow: hidden;
+        }
+        .form-header {
+            background: #ffffff;
+            padding: 25px;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .form-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .form-body {
+            padding: 40px;
+        }
+        .form-label {
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #555;
+            margin-bottom: 8px;
+        }
+        .form-control {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 14px;
+            background-color: #f9f9f9;
+            transition: all 0.3s;
+        }
+        .form-control:focus {
+            background-color: #fff;
+            border-color: #FFD700;
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
+        }
+        .btn-action {
+            width: 100%;
+            padding: 12px;
+            font-weight: 600;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+            border: none;
+        }
+        .btn-submit {
+            background: #000;
+            color: #FFD700;
+        }
+        .btn-submit:hover {
+            background: #333;
+            color: #fff;
+        }
+        .btn-cancel {
+            background: #fff;
+            color: #666;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+            text-align: center;
+            display: block;
+            text-decoration: none;
+        }
+        .btn-cancel:hover {
+            background: #f5f5f5;
+            color: #333;
+        }
+        .img-preview-container {
+            width: 100%;
+            height: 200px;
+            background: #f9f9f9;
+            border: 2px dashed #ddd;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .img-preview-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .row-gap {
+            row-gap: 20px;
+        }
+    </style>
+
+    <main class="form-container">
+        <div class="form-card">
+            <div class="form-header">
+                <h3 class="form-title"><i class="fas fa-plus-circle"></i> Create Product</h3>
+            </div>
+            <div class="form-body">
+                <form action="/api/v1/products" method="POST" enctype="multipart/form-data" id="createProductForm">
+                    <div class="row row-gap">
+                        <div class="col-md-6">
+                            <label for="title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="title" name="title" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="price" class="form-label">Price</label>
+                            <input type="number" class="form-control" id="price" name="price" step="0.01" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="priceAfterDiscount" class="form-label">Price After Discount</label>
+                            <input type="number" class="form-control" id="priceAfterDiscount" name="priceAfterDiscount" step="0.01">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="quantity" class="form-label">Quantity</label>
+                            <input type="number" class="form-control" id="quantity" name="quantity" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 mt-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="5" required></textarea>
+                    </div>
+
+                    <div class="row row-gap mb-3">
+                        <div class="col-md-6">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-control" id="category" name="category" required onchange="fetchSubcategories(this.value)">
+                                <option value="">Select Category</option>
+                                <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+                                    <% categories.forEach(cat => { %>
+                                        <option value="<%= cat._id %>"><%= cat.name %></option>
+                                    <% }); %>
+                                <% } %>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="subcategories" class="form-label">Subcategories</label>
+                            <select class="form-control" id="subcategories" name="subcategories" multiple>
+                                <option value="" disabled>Select Category First</option>
+                            </select>
+                            <small class="text-muted" style="font-size: 11px;">Hold Ctrl/Cmd to select multiple</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="brand" class="form-label">Brand (Optional)</label>
+                            <select class="form-control" id="brand" name="brand">
+                                <option value="">Select Brand</option>
+                                <% if (typeof brands !== 'undefined' && brands.length > 0) { %>
+                                    <% brands.forEach(brand => { %>
+                                        <option value="<%= brand._id %>"><%= brand.name %></option>
+                                    <% }); %>
+                                <% } %>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="colors" class="form-label">Colors (comma separated)</label>
+                            <input type="text" class="form-control" id="colors" name="colors" placeholder="e.g. Red, Blue, Green">
+                        </div>
+                    </div>
+
+                    <div class="row row-gap mb-4">
+                        <div class="col-md-6">
+                            <label for="imageCover" class="form-label">Cover Image</label>
+                            <input type="file" class="form-control" id="imageCover" name="imageCover" accept="image/*" required onchange="previewImage(this, 'coverPreview')">
+                            <div class="img-preview-container" id="coverPreviewContainer" style="display:none;">
+                                <img id="coverPreview" src="#" alt="Preview">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                             <label for="images" class="form-label">Additional Images (Max 5)</label>
+                             <input type="file" class="form-control" id="images" name="images" accept="image/*" multiple>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 mt-4">
+                        <button type="submit" class="btn-action btn-submit">Create Product</button>
+                        <a href="/products" class="btn-action btn-cancel">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/admin.js"></script>
+    <script>
+        // Preview Image Logic (keep local)
+        function previewImage(input, previewId) {
+            const preview = document.getElementById(previewId);
+            const container = document.getElementById(previewId + 'Container');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    if(container) container.style.display = 'flex';
+                    else preview.style.display = 'block';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Fetch Subcategories
+        async function fetchSubcategories(categoryId) {
+            const subSelect = document.getElementById('subcategories');
+            subSelect.innerHTML = '<option value="" disabled>Loading...</option>';
+            
+            if (!categoryId) {
+                subSelect.innerHTML = '<option value="" disabled>Select Category First</option>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/v1/categories/${categoryId}/subcategories`);
+                const data = await response.json();
+                
+                if (response.ok && data.data) {
+                    subSelect.innerHTML = ''; // Clear loading
+                    if (data.data.length === 0) {
+                        subSelect.innerHTML = '<option value="" disabled>No subcategories found</option>';
+                    } else {
+                        data.data.forEach(sub => {
+                            const option = document.createElement('option');
+                            option.value = sub._id;
+                            option.textContent = sub.name;
+                            subSelect.appendChild(option);
+                        });
+                    }
+                } else {
+                    subSelect.innerHTML = '<option value="" disabled>Error loading options</option>';
+                    console.error('Failed to fetch subcategories:', data);
+                }
+            } catch (error) {
+                console.error('Error fetching subcategories:', error);
+                subSelect.innerHTML = '<option value="" disabled>Error loading options</option>';
+            }
+        }
+    
+        // Attach Admin Submission Logic
+        document.getElementById('createProductForm').addEventListener('submit', function(e) {
+            // Since subcategories is a multi-select, FormData handles it automatically as multiple values with same name
+            // But sometimes validation in admin.js might need tweaking if it expects single strings.
+            // Let's rely on standard FormData behavior.
+            submitAdminForm(e, 'createProductForm', '/api/v1/products', '/products', 'POST');
+        });
+    </script>
+</body>
+</html>
+
+
+
+

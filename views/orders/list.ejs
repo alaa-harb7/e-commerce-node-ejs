@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - TOPICO</title>
+    <link rel="stylesheet" href="/css/topico-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .orders-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .order-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid #e5e5e5;
+        }
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        .order-id {
+            font-weight: 600;
+            color: #333;
+        }
+        .order-date {
+            color: #777;
+            font-size: 0.9em;
+        }
+        .order-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        .status-paid { background-color: #e6f9e6; color: #28a745; }
+        .status-unpaid { background-color: #fff3cd; color: #856404; }
+        .order-items {
+            margin-bottom: 15px;
+        }
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            color: #555;
+        }
+        .order-total {
+            border-top: 1px solid #f0f0f0;
+            padding-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: 700;
+            font-size: 1.1em;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/topico-header') %>
+
+    <div class="orders-container">
+        <h2 class="mb-4">My Orders</h2>
+        
+        <% if (orders && orders.length > 0) { %>
+            <% orders.forEach(order => { %>
+                <div class="order-card">
+                    <div class="order-header">
+                        <div>
+                            <div class="order-id">Order #<%= order._id.toString().slice(-6).toUpperCase() %></div>
+                            <div class="order-date"><%= new Date(order.createdAt).toLocaleDateString() %></div>
+                        </div>
+                        <div>
+                            <span class="order-status <%= order.isPaid ? 'status-paid' : 'status-unpaid' %>">
+                                <%= order.isPaid ? 'Paid' : 'Unpaid' %>
+                            </span>
+                             <span class="order-status <%= order.isDelivered ? 'status-paid' : 'status-unpaid' %>" style="margin-left: 5px;">
+                                <%= order.isDelivered ? 'Delivered' : 'Processing' %>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="order-items">
+                        <% order.cartItems.forEach(item => { %>
+                             <div class="order-item">
+                                <span><%= item.quantity %>x <%= item.product.title || 'Product' %></span>
+                                <span>$<%= item.price %></span>
+                            </div>
+                        <% }); %>
+                    </div>
+                    
+                    <div class="order-total">
+                        <span>Total</span>
+                        <span>$<%= order.totalOrderPrice %></span>
+                    </div>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <div class="text-center">
+                <h3>No orders found</h3>
+                <a href="/products" class="btn btn-primary mt-3">Start Shopping</a>
+            </div>
+        <% } %>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Check for success query param
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('success')) {
+            Swal.fire({
+                title: 'Payment Successful!',
+                text: 'Your order has been placed successfully.',
+                icon: 'success',
+                confirmButtonText: 'Great!'
+            });
+            // Clean URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    </script>
+</body>
+</html>

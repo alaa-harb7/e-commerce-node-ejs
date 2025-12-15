@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOPICO - Home</title>
+    <link rel="stylesheet" href="/css/topico-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Section -->
+    <!-- Header Section -->
+    <%- include('partials/topico-header') %>
+
+    <!-- Navigation Bar -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="/" class="nav-link active">HOME</a>
+            <a href="/products" class="nav-link">ALL PRODUCTS</a>
+            <a href="/about" class="nav-link">ABOUT US</a>
+            <a href="/contact" class="nav-link">CONTACT</a>
+            <a href="/categories" class="nav-link">CATEGORIES</a>
+            <a href="/subcategories" class="nav-link">SUBCATEGORIES</a>
+            <a href="/brands" class="nav-link">BRANDS</a>
+            <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                <a href="/users" class="nav-link">USERS</a>
+                <a href="/admin/coupons" class="nav-link">COUPONS</a>
+            <% } %>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-container">
+            <!-- Left Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <i class="fas fa-bars"></i>
+                    <h3>Shop by Department</h3>
+                </div>
+                <ul class="category-list">
+                    <li class="category-item"><a href="/categories">All Categories</a></li>
+                    <% if (typeof sidebarCategories !== 'undefined' && sidebarCategories.length > 0) { %>
+                        <% sidebarCategories.forEach(cat => { %>
+                            <li class="category-item">
+                                <a href="/products?category=<%= cat._id %>" class="category-link">
+                                    <%= cat.name %>
+                                    <% if (cat.subcategories && cat.subcategories.length > 0) { %>
+                                        <i class="fas fa-chevron-right toggle-icon"></i>
+                                    <% } %>
+                                </a>
+                                <% if (cat.subcategories && cat.subcategories.length > 0) { %>
+                                    <ul class="subcategory-list">
+                                        <% cat.subcategories.forEach(sub => { %>
+                                            <li class="subcategory-item">
+                                                <a href="/products?subCategory=<%= sub._id %>"><%= sub.name %></a>
+                                            </li>
+                                        <% }) %>
+                                    </ul>
+                                <% } %>
+                            </li>
+                        <% }) %>
+                    <% } %>
+                </ul>
+            </aside>
+
+            <!-- Featured Products Section (Next to Sidebar) -->
+            <div class="featured-products-section">
+                <div class="featured-header">
+                    <h2 class="featured-title">Featured Products</h2>
+                    <a href="/products?showAll=true" class="view-all-link">View All <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="featured-products-grid">
+                    <% if (typeof products !== 'undefined' && products.length > 0) { %>
+                        <% products.slice(0, 6).forEach(product => { %>
+                            <div class="featured-product-card">
+                                <div class="product-image-wrapper">
+                                    <img src="<%= product.imageCover %>" alt="<%= product.title %>" class="product-card-image" onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'">
+                                    <% if (product.priceAfterDiscount) { %>
+                                        <span class="discount-badge">Sale</span>
+                                    <% } %>
+                                    <div class="product-card-actions">
+                                        <button class="action-btn" onclick="addToCart('<%= product._id %>', '<%= product.colors && product.colors.length > 0 ? product.colors[0] : '' %>')" title="Add to Cart">
+                                            <i class="fas fa-shopping-cart"></i>
+                                        </button>
+                                        <button class="action-btn" onclick="toggleWishlist('<%= product._id %>')" title="Add to Wishlist">
+                                            <i class="fas fa-heart"></i>
+                                        </button>
+                                        <a href="/products/<%= product._id %>" class="action-btn" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="product-card-body">
+                                    <h3 class="product-card-title"><%= product.title %></h3>
+                                    <p class="product-card-category"><%= product.category ? product.category.name : 'Uncategorized' %></p>
+                                    <div class="product-card-price">
+                                        <% if (product.priceAfterDiscount) { %>
+                                            <span class="price-old">$<%= product.price.toFixed(2) %></span>
+                                            <span class="price-new">$<%= product.priceAfterDiscount.toFixed(2) %></span>
+                                        <% } else { %>
+                                            <span class="price-current">$<%= product.price.toFixed(2) %></span>
+                                        <% } %>
+                                    </div>
+                                    <% if (product.ratingsAverage) { %>
+                                        <div class="product-rating">
+                                            <% for (let i = 1; i <= 5; i++) { %>
+                                                <i class="fas fa-star <%= i <= product.ratingsAverage ? 'star-filled' : 'star-empty' %>"></i>
+                                            <% } %>
+                                            <span class="rating-text">(<%= product.ratingsQuantity %>)</span>
+                                        </div>
+                                    <% } %>
+                                    <a href="/products/<%= product._id %>" class="product-view-btn">View Details</a>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="no-products">
+                            <p>No products available at the moment.</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+
+        </div>
+
+        <!-- Categories Section (Full Width) -->
+        <div class="banner-container" style="margin-top: 50px;">
+            <div class="featured-products-section" style="margin: 0; width: 100%;">
+                <div class="featured-header">
+                    <h2 class="featured-title">Browse Categories</h2>
+                    <a href="/categories" class="view-all-link">View All <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="categories-circle-wrapper">
+                    <% if (typeof featuredCategories !== 'undefined' && featuredCategories.length > 0) { %>
+                        <% featuredCategories.forEach(cat => { %>
+                            <a href="/products?category=<%= cat._id %>" class="category-circle-item">
+                                <div class="category-circle-image">
+                                    <img src="<%= cat.image %>" alt="<%= cat.name %>" onerror="this.src='https://via.placeholder.com/150x150?text=Cat'">
+                                </div>
+                                <span class="category-circle-name"><%= cat.name %></span>
+                            </a>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="no-products" style="width: 100%;">
+                            <p>No categories found.</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Brands Section -->
+        <div class="banner-container" style="margin-top: 50px;">
+            <div class="featured-products-section" style="margin: 0; width: 100%;">
+                <div class="featured-header">
+                    <h2 class="featured-title">Our Brands</h2>
+                    <a href="/brands" class="view-all-link">View All <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="categories-circle-wrapper">
+                    <% if (typeof brands !== 'undefined' && brands.length > 0) { %>
+                        <% brands.forEach(brand => { %>
+                            <a href="/brands?id=<%= brand._id %>" class="category-circle-item">
+                                <div class="category-circle-image">
+                                    <img src="<%= brand.image %>" alt="<%= brand.name %>" onerror="this.src='https://via.placeholder.com/150x150?text=Brand'">
+                                </div>
+                                <span class="category-circle-name"><%= brand.name %></span>
+                            </a>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="no-products" style="width: 100%;">
+                            <p>No brands found.</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Banner (Below Sidebar and Featured Products) -->
+        <!-- <div class="banner-container">
+            <div class="promo-banner">
+                <div class="banner-content">
+                    <p class="banner-subtitle">XBOX WIRELESS CONTROLLER</p>
+                    <h1 class="banner-title">SPORT EDITION</h1>
+                    <p class="banner-description">Equip yourself with the Xbox Wireless Controller</p>
+                    <button class="banner-btn">DISCOVER NOW</button>
+                </div>
+                <div class="banner-image">
+                    <div class="controller-placeholder">
+                        <i class="fas fa-gamepad"></i>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/cart-wishlist.js"></script>
+</body>
+</html>

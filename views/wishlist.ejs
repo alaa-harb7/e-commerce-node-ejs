@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wishlist - TOPICO</title>
+    <link rel="stylesheet" href="/css/topico-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <%- include('partials/topico-header') %>
+
+    <div class="container py-5">
+        <h2 class="mb-4">My Wishlist</h2>
+        
+        <% if (typeof wishlist !== 'undefined' && wishlist && wishlist.length > 0) { %>
+            <div class="row">
+                <% wishlist.forEach(product => { %>
+                    <div class="col-md-3 mb-4">
+                        <div class="card h-100 shadow-sm border-0">
+                            <img src="<%= product.imageCover %>" class="card-img-top" alt="<%= product.title %>" style="height: 200px; object-fit: cover;">
+                            <div class="card-body">
+                                <h5 class="card-title text-truncate"><%= product.title %></h5>
+                                <p class="card-text text-success font-weight-bold">$<%= product.price %></p>
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-outline-dark" onclick="addToCart('<%= product._id %>', '<%= product.colors && product.colors.length > 0 ? product.colors[0] : '' %>')">
+                                        <i class="fas fa-cart-plus"></i> Add to Cart
+                                    </button>
+                                    <button class="btn btn-outline-danger" onclick="removeFromWishlist('<%= product._id %>')">
+                                        <i class="fas fa-trash"></i> Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        <% } else { %>
+            <div class="text-center py-5">
+                <i class="fas fa-heart-broken fa-4x text-muted mb-3"></i>
+                <h3>Your wishlist is empty</h3>
+                <p>Browse products and save your favorites here!</p>
+                <a href="/products?showAll=true" class="btn btn-dark mt-2">Start Shopping</a>
+            </div>
+        <% } %>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/cart-wishlist.js"></script>
+    <script>
+        async function removeFromWishlist(productId) {
+            try {
+                const response = await fetch(`/api/v1/wishlist/${productId}`, {
+                    method: 'DELETE'
+                });
+                if(response.ok) {
+                    location.reload();
+                } else {
+                    Swal.fire('Error', 'Could not remove from wishlist', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    </script>
+</body>
+</html>

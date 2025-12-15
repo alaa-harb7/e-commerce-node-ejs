@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categories - TOPICO</title>
+    <link rel="stylesheet" href="/css/topico-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <%- include('../partials/topico-header') %>
+    
+    <!-- Navigation Bar -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="/" class="nav-link">HOME</a>
+            <a href="/products?showAll=true" class="nav-link">ALL PRODUCTS</a>
+            <a href="/about" class="nav-link">ABOUT US</a>
+            <a href="/contact" class="nav-link">CONTACT</a>
+            <a href="/categories" class="nav-link active">CATEGORIES</a>
+            <a href="/subcategories" class="nav-link">SUBCATEGORIES</a>
+            <a href="/brands" class="nav-link">BRANDS</a>
+            <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                <a href="/users" class="nav-link">USERS</a>
+                <a href="/admin/coupons" class="nav-link">COUPONS</a>
+            <% } %>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="content-container" style="display: block;">
+            <div class="d-flex justify-content-between align-items-center mb-4" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h2 class="section-title" style="margin-bottom: 0;">Categories</h2>
+                <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                    <a href="/categories/create" class="view-all-btn" style="background-color: #28a745;">
+                        <i class="fas fa-plus"></i> Add Category
+                    </a>
+                <% } %>
+            </div>
+
+            <div class="products-grid">
+                <% if (typeof data !== 'undefined' && data.length > 0) { %>
+                    <% data.forEach(category => { %>
+                        <div class="product-card">
+                            <div class="product-image-wrapper">
+                                <% if (category.image) { %>
+                                    <img src="<%= category.image %>" class="product-card-image" alt="<%= category.name %>">
+                                <% } else { %>
+                                    <div style="height: 100%; display: flex; align-items: center; justify-content: center; background-color: #f5f5f5;">
+                                        <i class="fas fa-tag fa-3x" style="color: #ccc;"></i>
+                                    </div>
+                                <% } %>
+                            </div>
+                            <div class="product-card-body">
+                                <h3 class="product-card-title"><%= category.name %></h3>
+                                <div style="margin-top: auto; display: flex; flex-direction: column; gap: 10px;">
+                                    <a href="/products?category=<%= category._id %>" class="product-view-btn" style="width: 100%; text-align: center;">View Products</a>
+                                    <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                                        <div style="display: flex; gap: 10px; width: 100%;">
+                                            <a href="/categories/<%= category._id %>/edit" class="product-view-btn" style="background-color: #ffc107; color: #000; flex: 1; text-align: center;">Edit</a>
+                                            <button class="product-view-btn" style="background-color: #dc3545; color: #fff; flex: 1; border:3px solid #dc3545; cursor:pointer;" onclick="deleteCategory('<%= category._id %>')">Delete</button>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="no-products">
+                        <p>No categories found.</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </main>
+    <%- include('../partials/footer') %>
+
+    <script>
+    async function deleteCategory(id) {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/v1/categories/${id}`, {
+                    method: 'DELETE',
+                    // headers: { 'Authorization': 'Bearer ' + token }
+                });
+                
+                if (response.ok) {
+                    await Swal.fire(
+                        'Deleted!',
+                        'Category has been deleted.',
+                        'success'
+                    );
+                    window.location.reload();
+                } else {
+                    const data = await response.json();
+                    Swal.fire(
+                        'Error!',
+                        data.message || 'Failed to delete category',
+                        'error'
+                    );
+                }
+            } catch (err) {
+                console.error(err);
+                Swal.fire(
+                    'Error!',
+                    'An error occurred',
+                    'error'
+                );
+            }
+        }
+    }
+    </script>
+</body>
+</html>
+
+
+
+

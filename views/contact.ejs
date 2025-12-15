@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - TOPICO</title>
+    <link rel="stylesheet" href="/css/topico-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Section -->
+    <!-- Header Section -->
+    <%- include('partials/topico-header') %>
+
+    <!-- Navigation Bar -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="/" class="nav-link">HOME</a>
+            <a href="/products" class="nav-link">ALL PRODUCTS</a>
+            <a href="/about" class="nav-link">ABOUT US</a>
+            <a href="/contact" class="nav-link active">CONTACT</a>
+            <a href="/categories" class="nav-link">CATEGORIES</a>
+            <a href="/subcategories" class="nav-link">SUBCATEGORIES</a>
+            <a href="/brands" class="nav-link">BRANDS</a>
+            <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                <a href="/users" class="nav-link">USERS</a>
+            <% } %>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-container" style="flex-direction: column; max-width: 900px;">
+            <div style="padding: 40px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <h1 style="font-size: 36px; margin-bottom: 30px; color: #333;">Contact Us</h1>
+                <form style="display: flex; flex-direction: column; gap: 20px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Name</label>
+                        <input type="text" style="width: 100%; padding: 12px; border: 2px solid #e5e5e5; border-radius: 4px; font-size: 14px;" required>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Email</label>
+                        <input type="email" style="width: 100%; padding: 12px; border: 2px solid #e5e5e5; border-radius: 4px; font-size: 14px;" required>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Message</label>
+                        <textarea rows="6" style="width: 100%; padding: 12px; border: 2px solid #e5e5e5; border-radius: 4px; font-size: 14px; resize: vertical;" required></textarea>
+                    </div>
+                    <button type="submit" class="banner-btn" style="align-self: flex-start;">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
+
+
+
+
+

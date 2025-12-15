@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Coupon - TOPICO</title>
+    <link rel="stylesheet" href="/css/topico-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background-color: #FFD700;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn-submit:hover {
+            background-color: #ffce00;
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/topico-header') %>
+    
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="/" class="nav-link">HOME</a>
+            <a href="/products?showAll=true" class="nav-link">ALL PRODUCTS</a>
+            <a href="/about" class="nav-link">ABOUT US</a>
+            <a href="/contact" class="nav-link">CONTACT</a>
+            <a href="/categories" class="nav-link">CATEGORIES</a>
+            <a href="/subcategories" class="nav-link">SUBCATEGORIES</a>
+            <a href="/brands" class="nav-link">BRANDS</a>
+            <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                <a href="/users" class="nav-link">USERS</a>
+                <a href="/admin/coupons" class="nav-link active">COUPONS</a>
+            <% } %>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="form-container">
+            <h2 style="margin-bottom: 25px; text-align: center;">Add New Coupon</h2>
+            
+            <form id="createCouponForm">
+                <div class="form-group">
+                    <label class="form-label">Coupon Name (Code)</label>
+                    <input type="text" name="name" class="form-control" placeholder="e.g. SUMMER2024" required>
+                    <small style="color:#666; font-size:12px;">This is the code users will enter.</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Expire Date</label>
+                    <input type="date" name="expire" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Discount Percentage (0-100)</label>
+                    <input type="number" name="discount" class="form-control" min="0" max="100" placeholder="e.g. 10" required>
+                </div>
+
+                <!-- Hidden for now as validation enforces <= 100 anyway, implies percentage -->
+                <!-- <div class="form-group">
+                    <label class="form-label">Discount Type</label>
+                    <select name="discountType" class="form-control">
+                        <option value="percentage">Percentage</option>
+                        <option value="fixed">Fixed Amount</option>
+                    </select>
+                </div> -->
+
+                <div class="form-group">
+                    <label class="form-label">Usage Limit (Max users)</label>
+                    <input type="number" name="usageLimit" class="form-control" value="100">
+                </div>
+
+                <button type="submit" class="btn-submit">Create Coupon</button>
+            </form>
+        </div>
+    </main>
+    <%- include('../partials/footer') %>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+    document.getElementById('createCouponForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+            const response = await fetch('/api/v1/coupons', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Coupon created successfully',
+                    confirmButtonColor: '#FFD700'
+                });
+                window.location.href = '/admin/coupons';
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: result.message || 'Something went wrong',
+                    confirmButtonColor: '#d33'
+                });
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to connect to server',
+                confirmButtonColor: '#d33'
+            });
+        }
+    });
+    </script>
+</body>
+</html>

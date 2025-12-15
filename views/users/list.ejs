@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users Management - TOPICO</title>
+    <link rel="stylesheet" href="/css/topico-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .table-responsive {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .main-nav {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e5e5e5;
+            margin-bottom: 20px;
+        }
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            height: 50px;
+        }
+        .nav-link {
+            text-decoration: none;
+            padding: 15px 25px;
+            letter-spacing: 0.5px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+            text-transform: uppercase;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            transition: color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #FFD700;
+        }
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #FFD700;
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/topico-header') %>
+    
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="/" class="nav-link">HOME</a>
+            <a href="/products?showAll=true" class="nav-link">ALL PRODUCTS</a>
+            <a href="/about" class="nav-link">ABOUT US</a>
+            <a href="/contact" class="nav-link">CONTACT</a>
+            <a href="/categories" class="nav-link">CATEGORIES</a>
+            <a href="/subcategories" class="nav-link">SUBCATEGORIES</a>
+            <a href="/brands" class="nav-link">BRANDS</a>
+            
+            <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                <a href="/users" class="nav-link active">USERS</a>
+                <a href="/admin/coupons" class="nav-link">COUPONS</a>
+            <% } %>
+        </div>
+    </nav>
+
+    <main class="container py-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-users"></i> Users Management</h2>
+            <a href="/users/create" class="btn btn-primary"><i class="fas fa-plus"></i> Add User</a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Image</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (typeof data !== 'undefined' && data.length > 0) { %>
+                        <% data.forEach(u => { %>
+                            <tr>
+                                <td>
+                                    <% if (u.profileImage) { %>
+                                        <img src="<%= u.profileImage %>" alt="Profile" class="rounded-circle" width="50" height="50" style="object-fit: cover;">
+                                    <% } else { %>
+                                        <i class="fas fa-user-circle fa-2x text-secondary"></i>
+                                    <% } %>
+                                </td>
+                                <td><%= u.name %></td>
+                                <td><%= u.email %></td>
+                                <td><%= u.phone || 'N/A' %></td>
+                                <td>
+                                    <span class="badge bg-<%= u.role === 'admin' ? 'danger' : 'primary' %>">
+                                        <%= u.role %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="/users/<%= u._id %>/edit" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></a>
+                                    <!-- Avoid deleting yourself -->
+                                    <% if (typeof user !== 'undefined' && user._id.toString() !== u._id.toString()) { %>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteUser('<%= u._id %>')"><i class="fas fa-trash"></i></button>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="6" class="text-center">No users found</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
+        <% if (typeof paginationResult !== 'undefined') { %>
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <% if (paginationResult.prev) { %>
+                        <li class="page-item"><a class="page-link" href="?page=<%= paginationResult.prev %>">Previous</a></li>
+                    <% } %>
+                    <% for (let i = 1; i <= paginationResult.numberOfPages; i++) { %>
+                        <li class="page-item <%= i === paginationResult.page ? 'active' : '' %>">
+                            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                        </li>
+                    <% } %>
+                    <% if (paginationResult.next) { %>
+                        <li class="page-item"><a class="page-link" href="?page=<%= paginationResult.next %>">Next</a></li>
+                    <% } %>
+                </ul>
+            </nav>
+        <% } %>
+    </main>
+
+    <%- include('../partials/footer') %>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+    async function deleteUser(id) {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const response = await fetch(`/api/v1/users/${id}`, {
+                    method: 'DELETE',
+                });
+                
+                if (response.ok) {
+                    await Swal.fire(
+                        'Deleted!',
+                        'User has been deleted.',
+                        'success'
+                    );
+                    window.location.reload();
+                } else {
+                    const data = await response.json();
+                    Swal.fire(
+                        'Error!',
+                        data.message || 'Failed to delete user',
+                        'error'
+                    );
+                }
+            } catch (err) {
+                console.error(err);
+                Swal.fire(
+                    'Error!',
+                    'An error occurred',
+                    'error'
+                );
+            }
+        }
+    }
+    </script>
+</body>
+</html>
+
+
+
+

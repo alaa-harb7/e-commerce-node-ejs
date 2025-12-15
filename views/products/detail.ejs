@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= typeof data !== 'undefined' ? data.title + ' - TOPICO' : 'Product - TOPICO' %></title>
+    <link rel="stylesheet" href="/css/topico-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Section -->
+    <!-- Header Section -->
+    <%- include('../partials/topico-header') %>
+
+    <!-- Navigation Bar -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="/" class="nav-link">HOME</a>
+            <a href="/products?showAll=true" class="nav-link active">ALL PRODUCTS</a>
+            <a href="/about" class="nav-link">ABOUT US</a>
+            <a href="/contact" class="nav-link">CONTACT</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="product-detail-container">
+            <% if (typeof data !== 'undefined' && data) { %>
+                <div class="product-detail-wrapper">
+                    <!-- Product Images -->
+                    <div class="product-images-section">
+                        <div class="main-product-image">
+                            <img src="<%= data.imageCover %>" alt="<%= data.title %>" id="mainImage" onerror="this.src='https://via.placeholder.com/600x600?text=No+Image'">
+                        </div>
+                        <% if (data.images && data.images.length > 0) { %>
+                            <div class="product-thumbnails">
+                                <div class="thumbnail active" onclick="changeImage('<%= data.imageCover %>')">
+                                    <img src="<%= data.imageCover %>" alt="Main">
+                                </div>
+                                <% data.images.forEach(image => { %>
+                                    <div class="thumbnail" onclick="changeImage('<%= image %>')">
+                                        <img src="<%= image %>" alt="Product">
+                                    </div>
+                                <% }); %>
+                            </div>
+                        <% } %>
+                    </div>
+
+                    <!-- Product Info -->
+                    <div class="product-info-section">
+                        <h1 class="product-detail-title"><%= data.title %></h1>
+                        
+                        <% if (data.ratingsAverage) { %>
+                            <div class="product-detail-rating">
+                                <% for (let i = 1; i <= 5; i++) { %>
+                                    <i class="fas fa-star <%= i <= data.ratingsAverage ? 'star-filled' : 'star-empty' %>"></i>
+                                <% } %>
+                                <span class="rating-value"><%= data.ratingsAverage.toFixed(1) %></span>
+                                <span class="rating-count">(<%= data.ratingsQuantity %> reviews)</span>
+                            </div>
+                        <% } %>
+
+                        <div class="product-detail-price">
+                            <% if (data.priceAfterDiscount) { %>
+                                <span class="price-old-large">$<%= data.price.toFixed(2) %></span>
+                                <span class="price-new-large">$<%= data.priceAfterDiscount.toFixed(2) %></span>
+                                <span class="discount-percentage">Save <%= Math.round((1 - data.priceAfterDiscount/data.price) * 100) %>%</span>
+                            <% } else { %>
+                                <span class="price-current-large">$<%= data.price.toFixed(2) %></span>
+                            <% } %>
+                        </div>
+
+                        <div class="product-detail-description">
+                            <h3>Description</h3>
+                            <p><%= data.description %></p>
+                        </div>
+
+                        <div class="product-detail-specs">
+                            <div class="spec-item">
+                                <strong>Category:</strong> 
+                                <span><%= data.category ? data.category.name : 'Uncategorized' %></span>
+                            </div>
+                            <div class="spec-item">
+                                <strong>Quantity Available:</strong> 
+                                <span><%= data.quantity %> in stock</span>
+                            </div>
+                            <div class="spec-item">
+                                <strong>Sold:</strong> 
+                                <span><%= data.sold || 0 %> units</span>
+                            </div>
+                            <% if (data.colors && data.colors.length > 0) { %>
+                                <div class="spec-item">
+                                    <strong>Available Colors:</strong>
+                                    <div class="color-options">
+                                        <% data.colors.forEach(color => { %>
+                                            <span class="color-badge" style="background-color: <%= color.toLowerCase() %>;"><%= color %></span>
+                                        <% }); %>
+                                    </div>
+                                </div>
+                            <% } %>
+                        </div>
+
+                        <div class="product-actions">
+                            <button class="add-to-cart-btn" onclick="addToCart('<%= data._id %>', '<%= data.colors && data.colors.length > 0 ? data.colors[0] : '' %>')">
+                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                            </button>
+                            <button class="buy-now-btn" onclick="toggleWishlist('<%= data._id %>')">
+                                <i class="fas fa-heart"></i> Add to Wishlist
+                            </button>
+                        </div>
+                        
+                        <!-- Reviews Section -->
+                        <div class="reviews-section" style="margin-top: 50px; border-top: 1px solid #e5e5e5; padding-top: 30px;">
+                            <h3>Reviews (<%= data.ratingsQuantity || 0 %>)</h3>
+                            
+                             <% if (typeof user !== 'undefined' && user) { %>
+                                <div class="write-review mb-4">
+                                    <h5>Write a Review</h5>
+                                    <form id="reviewForm" onsubmit="submitReview(event, '<%= data._id %>')">
+                                        <div class="mb-3">
+                                            <label>Rating</label>
+                                            <select class="form-control" id="reviewRating" required>
+                                                <option value="5">5 - Excellent</option>
+                                                <option value="4">4 - Very Good</option>
+                                                <option value="3">3 - Good</option>
+                                                <option value="2">2 - Fair</option>
+                                                <option value="1">1 - Poor</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label>Comment</label>
+                                            <textarea class="form-control" id="reviewComment" rows="3" required></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Submit Review</button>
+                                    </form>
+                                </div>
+                            <% } else { %>
+                                <div class="alert alert-info">Please <a href="/auth/login">login</a> to write a review.</div>
+                            <% } %>
+
+                            <div id="reviewsList" class="mt-4">
+                                <!-- Reviews will be loaded here via API if we want dynamic, or SSR if we populate -->
+                                <!-- For now, let's assume we maintain simplicity and maybe populate reviews in the controller? -->
+                                <!-- We didn't Populate reviews in the route, so we might need to fetch them via JS or update the route. -->
+                                <!-- Let's use JS to fetch reviews for now to avoid modifying the route excessively -->
+                            </div>
+                        </div>
+
+                        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                        <script src="/js/cart-wishlist.js"></script>
+                        <script>
+                            async function submitReview(e, productId) {
+                                e.preventDefault();
+                                const ratings = document.getElementById('reviewRating').value;
+                                const comment = document.getElementById('reviewComment').value;
+                                
+                                try {
+                                    const response = await fetch('/api/v1/reviews', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ productId, ratings, comment })
+                                    });
+                                    const data = await response.json();
+                                    if(response.ok) {
+                                        Swal.fire('Success', 'Review submitted!', 'success').then(() => location.reload());
+                                    } else {
+                                        Swal.fire('Error', data.message || (data.errors ? data.errors[0].msg : 'Error submitting review'), 'error');
+                                    }
+                                } catch(err) {
+                                    console.error(err);
+                                }
+                            }
+                            
+                            // Load Reviews
+                            async function loadReviews() {
+                                const productId = '<%= data._id %>';
+                                const currentUser = <%- (typeof user !== 'undefined' && user) ? JSON.stringify(user) : 'null' %>;
+                                const response = await fetch(`/api/v1/products/${productId}/reviews`);
+                                const data = await response.json();
+                                if(data.data) {
+                                    const container = document.getElementById('reviewsList');
+                                    container.innerHTML = data.data.map(review => {
+                                        const initials = review.user.name.charAt(0).toUpperCase();
+                                        const isOwner = currentUser && (review.user._id === currentUser._id || review.user === currentUser._id);
+                                        
+                                        return `
+                                        <div class="review-card">
+                                            <div class="review-header">
+                                                <div class="review-user-info">
+                                                    <div class="user-avatar-placeholder">${initials}</div>
+                                                    <div class="review-meta">
+                                                        <span class="review-author">${review.user.name}</span>
+                                                        <span class="review-date">${new Date(review.createdAt).toLocaleDateString()}</span>
+                                                    </div>
+                                                </div>
+                                                ${isOwner ? `
+                                                    <div class="review-actions">
+                                                        <button class="review-action-btn edit-btn" onclick="editReview('${review._id}', '${review.ratings}', '${review.comment || ''}')" title="Edit">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                        <button class="review-action-btn delete-btn" onclick="deleteReview('${review._id}')" title="Delete">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                ` : ''}
+                                            </div>
+                                            <div class="review-stars">
+                                                ${ Array(5).fill(0).map((_, i) => `<i class="fas fa-star ${i < review.ratings ? '' : 'star-empty'}"></i>`).join('') }
+                                            </div>
+                                            <p class="review-text">${review.comment || review.title || ''}</p>
+                                        </div>
+                                    `}).join('');
+                                }
+                            }
+                            
+                            async function deleteReview(reviewId) {
+                                const result = await Swal.fire({
+                                    title: 'Are you sure?',
+                                    text: "You won't be able to revert this!",
+                                    icon: 'warning',
+                                    showCancelButton: true,
+                                    confirmButtonColor: '#d33',
+                                    cancelButtonColor: '#3085d6',
+                                    confirmButtonText: 'Yes, delete it!'
+                                });
+
+                                if (result.isConfirmed) {
+                                    try {
+                                        const response = await fetch(`/api/v1/reviews/${reviewId}`, { method: 'DELETE' });
+                                        if(response.ok) {
+                                            Swal.fire('Deleted!', 'Your review has been deleted.', 'success').then(() => location.reload());
+                                        } else {
+                                            const data = await response.json();
+                                            Swal.fire('Error', data.message || 'Could not delete review', 'error');
+                                        }
+                                    } catch (err) {
+                                        console.error(err);
+                                        Swal.fire('Error', 'Something went wrong', 'error');
+                                    }
+                                }
+                            }
+
+                            async function editReview(reviewId, currentRating, currentComment) {
+                                const { value: formValues } = await Swal.fire({
+                                    title: 'Edit Review',
+                                    html:
+                                        `<label>Rating</label>
+                                         <select id="swal-rating" class="swal2-input">
+                                            <option value="5" ${currentRating == 5 ? 'selected' : ''}>5 - Excellent</option>
+                                            <option value="4" ${currentRating == 4 ? 'selected' : ''}>4 - Very Good</option>
+                                            <option value="3" ${currentRating == 3 ? 'selected' : ''}>3 - Good</option>
+                                            <option value="2" ${currentRating == 2 ? 'selected' : ''}>2 - Fair</option>
+                                            <option value="1" ${currentRating == 1 ? 'selected' : ''}>1 - Poor</option>
+                                         </select>
+                                         <br><label>Comment</label>
+                                         <textarea id="swal-comment" class="swal2-textarea">${currentComment}</textarea>`,
+                                    focusConfirm: false,
+                                    showCancelButton: true,
+                                    preConfirm: () => {
+                                        return {
+                                            ratings: document.getElementById('swal-rating').value,
+                                            comment: document.getElementById('swal-comment').value
+                                        }
+                                    }
+                                });
+
+                                if (formValues) {
+                                    try {
+                                        const response = await fetch(`/api/v1/reviews/${reviewId}`, {
+                                            method: 'PUT',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify(formValues)
+                                        });
+                                        const data = await response.json();
+                                        if(response.ok) {
+                                            Swal.fire('Success', 'Review updated!', 'success').then(() => location.reload());
+                                        } else {
+                                            Swal.fire('Error', data.message || (data.errors ? data.errors[0].msg : 'Error updating review'), 'error');
+                                        }
+                                    } catch (err) {
+                                        console.error(err);
+                                        Swal.fire('Error', 'Something went wrong', 'error');
+                                    }
+                                }
+                            }
+
+                            loadReviews();
+                        </script>
+
+                        <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                            <div class="admin-actions" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e5e5;">
+                                <a href="/products/<%= data._id %>/edit" class="product-view-btn" style="background-color: #ffc107; color: #000; margin-bottom: 10px;">
+                                    <i class="fas fa-edit"></i> Edit Product
+                                </a>
+                                <a href="/products/<%= data._id %>/delete" onclick="return confirm('Are you sure you want to delete this product?')" class="product-view-btn" style="background-color: #dc3545; color: #fff;">
+                                    <i class="fas fa-trash"></i> Delete Product
+                                </a>
+                            </div>
+                        <% } %>
+
+                        <div class="back-to-products">
+                            <a href="/products?showAll=true" class="back-link">
+                                <i class="fas fa-arrow-left"></i> Back to Products
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="product-not-found">
+                    <h2>Product Not Found</h2>
+                    <p>The product you're looking for doesn't exist.</p>
+                    <a href="/products?showAll=true" class="view-all-btn">Browse All Products</a>
+                </div>
+            <% } %>
+        </div>
+    </main>
+
+    <script>
+        function changeImage(imageSrc) {
+            document.getElementById('mainImage').src = imageSrc;
+            // Update active thumbnail
+            document.querySelectorAll('.thumbnail').forEach(thumb => {
+                thumb.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Products - TOPICO</title>
+    <link rel="stylesheet" href="/css/topico-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Section -->
+    <!-- Header Section -->
+    <%- include('../partials/topico-header') %>
+
+    <!-- Navigation Bar -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="/" class="nav-link">HOME</a>
+            <a href="/products?showAll=true" class="nav-link active">ALL PRODUCTS</a>
+            <a href="/about" class="nav-link">ABOUT US</a>
+            <a href="/contact" class="nav-link">CONTACT</a>
+            <a href="/categories" class="nav-link">CATEGORIES</a>
+            <a href="/subcategories" class="nav-link">SUBCATEGORIES</a>
+            <a href="/brands" class="nav-link ">BRANDS</a>
+            <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                <a href="/users" class="nav-link">USERS</a>
+                <a href="/admin/coupons" class="nav-link">COUPONS</a>
+            <% } %>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="products-section" style="margin-top: 0; display: flex; gap: 20px;">
+            <!-- Filter Sidebar -->
+            <aside class="filter-sidebar" style="width: 280px; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); height: fit-content; position: sticky; top: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="margin: 0; font-size: 18px;"><i class="fas fa-filter"></i> Filters</h3>
+                    <a href="/products" style="font-size: 12px; color: #dc3545; text-decoration: none;">Clear All</a>
+                </div>
+                
+                <form id="filterForm" method="GET" action="/products">
+                    <!-- Preserve search keyword -->
+                    <% if (typeof query !== 'undefined' && query.keyword) { %>
+                        <input type="hidden" name="keyword" value="<%= query.keyword %>">
+                    <% } %>
+                    
+                    <!-- Price Range Filter -->
+                    <div class="filter-section" style="margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #eee;">
+                        <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #333;">Price Range</h4>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="number" name="minPrice" placeholder="Min" value="<%= typeof query !== 'undefined' && query.minPrice ? query.minPrice : '' %>" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+                            <span style="color: #999;">-</span>
+                            <input type="number" name="maxPrice" placeholder="Max" value="<%= typeof query !== 'undefined' && query.maxPrice ? query.maxPrice : '' %>" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+                        </div>
+                    </div>
+                    
+                    <!-- Stock Status Filter -->
+                    <div class="filter-section" style="margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #eee;">
+                        <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #333;">Availability</h4>
+                        <label style="display: flex; align-items: center; margin-bottom: 8px; cursor: pointer; font-size: 13px;">
+                            <input type="radio" name="inStock" value="" <%= typeof query === 'undefined' || !query.inStock ? 'checked' : '' %> style="margin-right: 8px;">
+                            <span>All Products</span>
+                        </label>
+                        <label style="display: flex; align-items: center; margin-bottom: 8px; cursor: pointer; font-size: 13px;">
+                            <input type="radio" name="inStock" value="true" <%= typeof query !== 'undefined' && query.inStock === 'true' ? 'checked' : '' %> style="margin-right: 8px;">
+                            <span>In Stock</span>
+                        </label>
+                        <label style="display: flex; align-items: center; cursor: pointer; font-size: 13px;">
+                            <input type="radio" name="inStock" value="false" <%= typeof query !== 'undefined' && query.inStock === 'false' ? 'checked' : '' %> style="margin-right: 8px;">
+                            <span>Out of Stock</span>
+                        </label>
+                    </div>
+                    
+                    <!-- Category Filter -->
+                    <div class="filter-section" style="margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #eee;">
+                        <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #333;">Categories</h4>
+                        <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+                            <% categories.slice(0, 8).forEach(cat => { %>
+                                <label style="display: flex; align-items: center; margin-bottom: 8px; cursor: pointer; font-size: 13px;">
+                                    <input type="radio" name="category" value="<%= cat._id %>" <%= typeof query !== 'undefined' && query.category === cat._id.toString() ? 'checked' : '' %> style="margin-right: 8px;">
+                                    <span><%= cat.name %></span>
+                                </label>
+                            <% }); %>
+                            <% if (typeof query !== 'undefined' && query.category) { %>
+                                <label style="display: flex; align-items: center; margin-top: 8px; cursor: pointer; font-size: 13px; color: #dc3545;">
+                                    <input type="radio" name="category" value="" style="margin-right: 8px;">
+                                    <span>Clear Category</span>
+                                </label>
+                            <% } %>
+                        <% } %>
+                    </div>
+                    
+                    <!-- Color Filter -->
+                    <div class="filter-section" style="margin-bottom: 20px;">
+                        <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #333;">Colors</h4>
+                        <% if (typeof availableColors !== 'undefined' && availableColors.length > 0) { %>
+                            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                                <% availableColors.forEach(color => { 
+                                    const isSelected = typeof query !== 'undefined' && query.colors && (Array.isArray(query.colors) ? query.colors.includes(color) : query.colors === color);
+                                %>
+                                    <label style="cursor: pointer; position: relative; display: inline-block;" title="<%= color %>">
+                                        <input type="checkbox" name="colors" value="<%= color %>" <%= isSelected ? 'checked' : '' %> class="color-checkbox" style="position: absolute; opacity: 0;">
+                                        <div class="color-swatch" style="width: 36px; height: 36px; border-radius: 50%; background-color: <%= color %>; border: 3px solid <%= isSelected ? '#FFD700' : '#ddd' %>; box-shadow: <%= isSelected ? '0 0 0 2px #FFD700' : '0 2px 4px rgba(0,0,0,0.1)' %>; transition: all 0.2s; position: relative;">
+                                            <% if (isSelected) { %>
+                                                <i class="fas fa-check" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: <%= color === 'white' || color === '#fff' || color === '#ffffff' ? '#333' : '#fff' %>; font-size: 14px; text-shadow: 0 1px 2px rgba(0,0,0,0.3);"></i>
+                                            <% } %>
+                                        </div>
+                                        <span style="display: block; text-align: center; font-size: 10px; margin-top: 4px; color: #666; text-transform: capitalize;"><%= color.replace('#', '') %></span>
+                                    </label>
+                                <% }); %>
+                            </div>
+                        <% } %>
+                    </div>
+                    
+                    <!-- Apply Filters Button -->
+                    <button type="submit" style="width: 100%; padding: 12px; background-color: #FFD700; color: #000; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 14px; transition: background-color 0.2s;">
+                        Apply Filters
+                    </button>
+                </form>
+                
+                <style>
+                    .color-check-icon {
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        font-size: 14px;
+                        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+                    }
+                </style>
+                <script>
+                // Add interactive color selection
+                document.querySelectorAll('.color-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        const swatch = this.nextElementSibling;
+                        if (this.checked) {
+                            swatch.style.border = '3px solid #FFD700';
+                            swatch.style.boxShadow = '0 0 0 2px #FFD700';
+                            // Add checkmark
+                            if (!swatch.querySelector('.fa-check')) {
+                                const color = this.value;
+                                const isLight = color === 'white' || color === '#fff' || color === '#ffffff';
+                                const iconColor = isLight ? '#333' : '#fff';
+                                swatch.innerHTML = `<i class="fas fa-check color-check-icon" style="color: ${iconColor};"></i>`;
+                            }
+                        } else {
+                            swatch.style.border = '3px solid #ddd';
+                            swatch.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                            // Remove checkmark
+                            swatch.innerHTML = '';
+                        }
+                    });
+                });
+                </script>
+            </aside>
+            
+            <!-- Products Container -->
+            <div class="products-container" style="flex: 1;">
+                <div class="d-flex justify-content-between align-items-center mb-4" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                    <h2 class="section-title" style="margin-bottom: 0;">
+                        All Products
+                        <% if (typeof showAll !== 'undefined' && showAll) { %>
+                            <span style="font-size: 18px; font-weight: 400; color: #666;">(<%= typeof data !== 'undefined' ? data.length : 0 %> products)</span>
+                        <% } else if (typeof paginationResult !== 'undefined' && paginationResult) { %>
+                            <span style="font-size: 18px; font-weight: 400; color: #666;">(Page <%= paginationResult.page %> of <%= paginationResult.numberOfPages %> - <%= paginationResult.totalCount %> total)</span>
+                        <% } %>
+                    </h2>
+                    <div>
+                        <% if (typeof showAll === 'undefined' || !showAll) { %>
+                            <a href="/products?showAll=true<%= typeof query !== 'undefined' && query.keyword ? '&keyword=' + encodeURIComponent(query.keyword) : '' %>" class="view-all-btn" style="margin-right: 10px;">
+                                <i class="fas fa-list"></i> Show All
+                            </a>
+                        <% } else { %>
+                            <a href="/products?page=1<%= typeof query !== 'undefined' && query.keyword ? '&keyword=' + encodeURIComponent(query.keyword) : '' %>" class="view-all-btn" style="background-color: #666; margin-right: 10px;">
+                                <i class="fas fa-th"></i> Paginated View
+                            </a>
+                        <% } %>
+                        <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                            <a href="/products/create" class="view-all-btn" style="background-color: #28a745;">
+                                <i class="fas fa-plus"></i> Add Product
+                            </a>
+                        <% } %>
+                    </div>
+                </div>
+
+                <div class="products-grid">
+                    <% if (typeof data !== 'undefined' && data.length > 0) { %>
+                        <% data.forEach(product => { %>
+                            <div class="product-card">
+                                <div class="product-image-wrapper">
+                                    <img src="<%= product.imageCover %>" alt="<%= product.title %>" class="product-card-image" onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'">
+                                    <% if (product.priceAfterDiscount) { %>
+                                        <span class="discount-badge">Sale</span>
+                                    <% } %>
+                                    <div class="product-card-actions">
+                                        <button class="action-btn" onclick="addToCart('<%= product._id %>', '<%= product.colors && product.colors.length > 0 ? product.colors[0] : '' %>')" title="Add to Cart">
+                                            <i class="fas fa-shopping-cart"></i>
+                                        </button>
+                                        <button class="action-btn" onclick="toggleWishlist('<%= product._id %>')" title="Add to Wishlist">
+                                            <i class="fas fa-heart"></i>
+                                        </button>
+                                        <a href="/products/<%= product._id %>" class="action-btn" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="product-card-body">
+                                    <h3 class="product-card-title"><%= product.title %></h3>
+                                    <p class="product-card-category"><%= product.category ? product.category.name : 'Uncategorized' %></p>
+                                    <div class="product-card-price">
+                                        <% if (product.priceAfterDiscount) { %>
+                                            <span class="price-old">$<%= product.price.toFixed(2) %></span>
+                                            <span class="price-new">$<%= product.priceAfterDiscount.toFixed(2) %></span>
+                                        <% } else { %>
+                                            <span class="price-current">$<%= product.price.toFixed(2) %></span>
+                                        <% } %>
+                                    </div>
+                                    <% if (product.ratingsAverage) { %>
+                                        <div class="product-rating">
+                                            <% for (let i = 1; i <= 5; i++) { %>
+                                                <i class="fas fa-star <%= i <= product.ratingsAverage ? 'star-filled' : 'star-empty' %>"></i>
+                                            <% } %>
+                                            <span class="rating-text">(<%= product.ratingsQuantity %>)</span>
+                                        </div>
+                                    <% } %>
+                                    <a href="/products/<%= product._id %>" class="product-view-btn">View Details</a>
+                                    <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                                        <div style="margin-top: 10px; display: flex; gap: 5px;">
+                                            <a href="/products/<%= product._id %>/edit" class="product-view-btn" style="background-color: #ffc107; color: #000; font-size: 12px; padding: 8px 12px; flex: 1;">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                            <a href="#" onclick="deleteAdminItem(event, '/api/v1/products/<%= product._id %>', '/products')" class="product-view-btn" style="background-color: #dc3545; color: #fff; font-size: 12px; padding: 8px 12px; flex: 1;">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </a>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="no-products">
+                            <p>No products found. <% if (typeof query !== 'undefined' && query.keyword) { %>Try a different search term.<% } %></p>
+                        </div>
+                    <% } %>
+                </div>
+
+                <% if (typeof paginationResult !== 'undefined' && paginationResult && !showAll) { %>
+                    <div class="pagination-container" style="margin-top: 40px; text-align: center;">
+                        <nav aria-label="Page navigation">
+                            <ul style="display: inline-flex; list-style: none; padding: 0; gap: 5px;">
+                                <% 
+                                    function buildUrl(pageNum) {
+                                        let url = '/products?page=' + pageNum;
+                                        if (typeof query !== 'undefined') {
+                                            if (query.keyword) url += '&keyword=' + encodeURIComponent(query.keyword);
+                                            if (query.sort) url += '&sort=' + encodeURIComponent(query.sort);
+                                            if (query.limit) url += '&limit=' + encodeURIComponent(query.limit);
+                                        }
+                                        return url;
+                                    }
+                                %>
+                                <% if (paginationResult.prev) { %>
+                                    <li>
+                                        <a href="<%= buildUrl(paginationResult.prev) %>" class="view-all-btn" style="padding: 10px 20px; text-decoration: none;">
+                                            <i class="fas fa-chevron-left"></i> Previous
+                                        </a>
+                                    </li>
+                                <% } %>
+                                <% for (let i = 1; i <= paginationResult.numberOfPages; i++) { %>
+                                    <li>
+                                        <a href="<%= buildUrl(i) %>" class="view-all-btn <%= i === paginationResult.page ? 'active' : '' %>" style="padding: 10px 15px; text-decoration: none; <%= i === paginationResult.page ? 'background-color: #FFD700; color: #000;' : '' %>">
+                                            <%= i %>
+                                        </a>
+                                    </li>
+                                <% } %>
+                                <% if (paginationResult.next) { %>
+                                    <li>
+                                        <a href="<%= buildUrl(paginationResult.next) %>" class="view-all-btn" style="padding: 10px 20px; text-decoration: none;">
+                                            Next <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                <% } %>
+                            </ul>
+                        </nav>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/cart-wishlist.js"></script>
+    <script src="/js/admin.js"></script>
+</body>
+</html>

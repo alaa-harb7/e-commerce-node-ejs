@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Subcategory - TOPICO</title>
+    <link rel="stylesheet" href="/css/topico-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 40px auto;
+        }
+        .form-card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.05);
+            border: 1px solid #eaeaea;
+            overflow: hidden;
+        }
+        .form-header {
+            background: #ffffff;
+            padding: 25px;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .form-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .form-body {
+            padding: 40px;
+        }
+        .form-label {
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #555;
+            margin-bottom: 8px;
+        }
+        .form-control {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 14px;
+            background-color: #f9f9f9;
+            transition: all 0.3s;
+        }
+        .form-control:focus {
+            background-color: #fff;
+            border-color: #FFD700;
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
+        }
+        .btn-action {
+            width: 100%;
+            padding: 12px;
+            font-weight: 600;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+            border: none;
+        }
+        .btn-submit {
+            background: #000;
+            color: #FFD700;
+        }
+        .btn-submit:hover {
+            background: #333;
+            color: #fff;
+        }
+        .btn-cancel {
+            background: #fff;
+            color: #666;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+            text-align: center;
+            display: block;
+            text-decoration: none;
+        }
+        .btn-cancel:hover {
+            background: #f5f5f5;
+            color: #333;
+        }
+    </style>
+
+    <main class="form-container">
+        <div class="form-card">
+            <div class="form-header">
+                <h3 class="form-title">Create New Subcategory</h3>
+            </div>
+            <div class="form-body">
+                 <form id="createSubCategoryForm">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Subcategory Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="category" class="form-label">Parent Category</label>
+                        <select class="form-control" id="category" name="category" required>
+                            <option value="">Select Category</option>
+                            <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+                                <% categories.forEach(cat => { %>
+                                    <option value="<%= cat._id %>"><%= cat.name %></option>
+                                <% }); %>
+                            <% } %>
+                        </select>
+                    </div>
+                    <div class="d-flex gap-3 mt-4">
+                        <button type="submit" class="btn-action btn-submit">Create Subcategory</button>
+                        <a href="/subcategories" class="btn-action btn-cancel">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+    document.getElementById('createSubCategoryForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = {
+            name: document.getElementById('name').value,
+            category: document.getElementById('category').value
+        };
+        const token = localStorage.getItem('token');
+        
+        try {
+            const response = await fetch('/api/v1/subcategories', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    // 'Authorization': 'Bearer ' + token 
+                },
+                body: JSON.stringify(formData)
+            });
+            
+            if (response.ok) {
+                await Swal.fire(
+                    'Success!',
+                    'Subcategory created successfully',
+                    'success'
+                );
+                window.location.href = '/subcategories';
+            } else {
+                const data = await response.json();
+                Swal.fire(
+                    'Error!',
+                    data.message || 'Failed to create subcategory',
+                    'error'
+                );
+            }
+        } catch (err) {
+            console.error(err);
+            Swal.fire(
+                'Error!',
+                'An error occurred',
+                'error'
+            );
+        }
+    });
+    </script>
+</body>
+</html>
+

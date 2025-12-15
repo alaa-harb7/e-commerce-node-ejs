@@ -1,0 +1,67 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">
+            <i class="fas fa-shopping-cart"></i> Ecommerce
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/products">Products</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/categories">Categories</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/brands">Brands</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <% if (user.profileImg || user.avatar) { %>
+                                <img src="<%= user.profileImg || user.avatar %>" alt="Avatar" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
+                            <% } else { %>
+                                <i class="fas fa-user-circle fa-2x"></i>
+                            <% } %>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="navbarDropdown" style="min-width:220px;">
+                            <li class="pb-2 text-center">
+                                <% if (user.profileImg || user.avatar) { %>
+                                    <img src="<%= user.profileImg || user.avatar %>" alt="Avatar" style="width:56px;height:56px;border-radius:50%;object-fit:cover;margin-bottom:4px;">
+                                <% } else { %>
+                                    <i class="fas fa-user-circle fa-3x mb-2"></i>
+                                <% } %>
+                                <div class="fw-bold fs-5"><%= user.name %></div>
+                                <div class="text-muted small"><%= user.email %></div>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/users/me">Profile</a></li>
+                            <li><a class="dropdown-item" href="/users/settings">Settings</a></li>
+                            <% if (user.role === 'admin') { %>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="/users">Manage Users</a></li>
+                                <li><a class="dropdown-item" href="/products/create">Add Product</a></li>
+                                <li><a class="dropdown-item" href="/categories/create">Add Category</a></li>
+                                <li><a class="dropdown-item" href="/brands/create">Add Brand</a></li>
+                            <% } %>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item logout-link" href="/auth/logout">Logout</a></li>
+                        </ul>
+                    </li>
+                <% } else { %>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/auth/login">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/auth/signup">Sign Up</a>
+                    </li>
+                <% } %>
+            </ul>
+        </div>
+    </div>
+</nav>
+

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coupons - TOPICO</title>
+    <link rel="stylesheet" href="/css/topico-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <%- include('../partials/topico-header') %>
+    
+    <!-- Navigation Bar -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="/" class="nav-link">HOME</a>
+            <a href="/products?showAll=true" class="nav-link">ALL PRODUCTS</a>
+            <a href="/about" class="nav-link">ABOUT US</a>
+            <a href="/contact" class="nav-link">CONTACT</a>
+            <a href="/categories" class="nav-link">CATEGORIES</a>
+            <a href="/subcategories" class="nav-link">SUBCATEGORIES</a>
+            <a href="/brands" class="nav-link">BRANDS</a>
+            <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                <a href="/users" class="nav-link">USERS</a>
+                <a href="/admin/coupons" class="nav-link active">COUPONS</a>
+            <% } %>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="content-container" style="display: block;">
+            <div class="d-flex justify-content-between align-items-center mb-4" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h2 class="section-title" style="margin-bottom: 0;">Coupons</h2>
+                <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                    <a href="/admin/coupons/create" class="view-all-btn" style="background-color: #28a745;">
+                        <i class="fas fa-plus"></i> Add Coupon
+                    </a>
+                <% } %>
+            </div>
+
+            <div class="table-responsive" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #eee;">
+                            <th style="padding: 15px; text-align: left;">Name</th>
+                            <th style="padding: 15px; text-align: left;">Expires</th>
+                            <th style="padding: 15px; text-align: left;">Discount</th>
+                            <th style="padding: 15px; text-align: left;">Usage</th>
+                            <th style="padding: 15px; text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (typeof coupons !== 'undefined' && coupons.length > 0) { %>
+                            <% coupons.forEach(coupon => { %>
+                                <tr style="border-bottom: 1px solid #f5f5f5;">
+                                    <td style="padding: 15px; font-weight: 500;"><%= coupon.name %></td>
+                                    <td style="padding: 15px; color: #666;"><%= new Date(coupon.expire).toLocaleDateString() %></td>
+                                    <td style="padding: 15px; color: #28a745; font-weight: 600;">
+                                        <%= coupon.discount %>%
+                                    </td>
+                                    <td style="padding: 15px; color: #666;">
+                                        <%= coupon.usedCount || 0 %> / <%= coupon.usageLimit || '∞' %>
+                                    </td>
+                                    <td style="padding: 15px; text-align: right;">
+                                        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                                            <a href="/admin/coupons/<%= coupon._id %>/edit" class="btn btn-sm" style="background-color: #ffc107; color: #000; padding: 5px 10px; border-radius: 4px; text-decoration: none;">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button onclick="deleteCoupon('<%= coupon._id %>')" style="background-color: #dc3545; color: #fff; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer;">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="5" style="padding: 30px; text-align: center; color: #666;">No coupons found.</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+    <%- include('../partials/footer') %>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+    async function deleteCoupon(id) {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const response = await fetch(`/api/v1/coupons/${id}`, {
+                    method: 'DELETE',
+                });
+                
+                if (response.ok) {
+                    await Swal.fire(
+                        'Deleted!',
+                        'Coupon has been deleted.',
+                        'success'
+                    );
+                    window.location.reload();
+                } else {
+                    const data = await response.json();
+                    Swal.fire(
+                        'Error!',
+                        data.message || 'Failed to delete coupon',
+                        'error'
+                    );
+                }
+            } catch (err) {
+                console.error(err);
+                Swal.fire(
+                    'Error!',
+                    'An error occurred',
+                    'error'
+                );
+            }
+        }
+    }
+    </script>
+</body>
+</html>

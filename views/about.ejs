@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - TOPICO</title>
+    <link rel="stylesheet" href="/css/topico-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .main-nav {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e5e5e5;
+            margin-bottom: 20px;
+        }
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            height: 50px;
+        }
+        .nav-link {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+            text-transform: uppercase;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            transition: color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #FFD700;
+        }
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #FFD700;
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/topico-header') %>
+
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="/" class="nav-link">HOME</a>
+            <a href="/products" class="nav-link">ALL PRODUCTS</a>
+            <a href="/about" class="nav-link active">ABOUT US</a>
+            <a href="/contact" class="nav-link">CONTACT</a>
+            <a href="/categories" class="nav-link">CATEGORIES</a>
+            <a href="/subcategories" class="nav-link">SUBCATEGORIES</a>
+            <a href="/brands" class="nav-link">BRANDS</a>
+            <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                <a href="/users" class="nav-link">USERS</a>
+            <% } %>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="content-container" style="flex-direction: column; max-width: 900px;">
+            <div style="padding: 40px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <h1 style="font-size: 36px; margin-bottom: 20px; color: #333;">About TOPICO</h1>
+                <p style="font-size: 16px; line-height: 1.8; color: #666; margin-bottom: 20px;">
+                    Welcome to TOPICO, your premier destination for quality products and exceptional shopping experiences.
+                </p>
+                <p style="font-size: 16px; line-height: 1.8; color: #666; margin-bottom: 20px;">
+                    We are committed to providing our customers with the best products, competitive prices, and outstanding customer service.
+                </p>
+            </div>
+        </div>
+    </main>
+    <%- include('partials/footer') %>
+</body>
+</html>
+
+
+
+

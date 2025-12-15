@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Subcategory - TOPICO</title>
+    <link rel="stylesheet" href="/css/topico-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 40px auto;
+        }
+        .form-card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.05);
+            border: 1px solid #eaeaea;
+            overflow: hidden;
+        }
+        .form-header {
+            background: #ffffff;
+            padding: 25px;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .form-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .form-body {
+            padding: 40px;
+        }
+        .form-label {
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #555;
+            margin-bottom: 8px;
+        }
+        .form-control {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 14px;
+            background-color: #f9f9f9;
+            transition: all 0.3s;
+        }
+        .form-control:focus {
+            background-color: #fff;
+            border-color: #FFD700;
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
+        }
+        .btn-action {
+            width: 100%;
+            padding: 12px;
+            font-weight: 600;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+            border: none;
+        }
+        .btn-submit {
+            background: #000;
+            color: #FFD700;
+        }
+        .btn-submit:hover {
+            background: #333;
+            color: #fff;
+        }
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+            margin-top: 10px;
+        }
+        .btn-delete:hover {
+            background-color: #c82333;
+            color: white;
+        }
+        .btn-cancel {
+            background: #fff;
+            color: #666;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+            text-align: center;
+            display: block;
+            text-decoration: none;
+        }
+        .btn-cancel:hover {
+            background: #f5f5f5;
+            color: #333;
+        }
+    </style>
+
+    <main class="form-container">
+        <div class="form-card">
+            <div class="form-header">
+                <h3 class="form-title">Edit Subcategory</h3>
+            </div>
+            <div class="form-body">
+                <form id="editSubCategoryForm">
+                    <input type="hidden" id="subCategoryId" value="<%= subCategory._id %>">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Subcategory Name</label>
+                        <input type="text" class="form-control" id="name" name="name" value="<%= subCategory.name %>" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="category" class="form-label">Parent Category</label>
+                        <select class="form-control" id="category" name="category" required>
+                            <option value="">Select Category</option>
+                            <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+                                <% categories.forEach(cat => { %>
+                                    <option value="<%= cat._id %>" <%= subCategory.category && subCategory.category.toString() === cat._id.toString() ? 'selected' : '' %>><%= cat.name %></option>
+                                <% }); %>
+                            <% } %>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn-action btn-submit">Update Subcategory</button>
+                    <button type="button" class="btn-action btn-delete" onclick="deleteSubCategory()">Delete Subcategory</button>
+                    <a href="/subcategories" class="btn-action btn-cancel">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </main>
+    <%- include('../partials/footer') %>
+
+    <script>
+    document.getElementById('editSubCategoryForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const subCategoryId = document.getElementById('subCategoryId').value;
+        const formData = {
+            name: document.getElementById('name').value,
+            category: document.getElementById('category').value
+        };
+        const token = localStorage.getItem('token');
+        
+        try {
+            const response = await fetch(`/api/v1/subcategories/${subCategoryId}`, {
+                method: 'PUT',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    // 'Authorization': 'Bearer ' + token 
+                },
+                body: JSON.stringify(formData)
+            });
+            
+            if (response.ok) {
+                await Swal.fire(
+                    'Success!',
+                    'Subcategory updated successfully',
+                    'success'
+                );
+                window.location.href = '/subcategories';
+            } else {
+                const data = await response.json();
+                Swal.fire(
+                    'Error!',
+                    data.message || 'Failed to update subcategory',
+                    'error'
+                );
+            }
+        } catch (err) {
+            console.error(err);
+            Swal.fire(
+                'Error!',
+                'An error occurred',
+                'error'
+            );
+        }
+    });
+
+    async function deleteSubCategory() {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        });
+
+        if (result.isConfirmed) {
+            const subCategoryId = document.getElementById('subCategoryId').value;
+            
+            try {
+                const response = await fetch(`/api/v1/subcategories/${subCategoryId}`, {
+                    method: 'DELETE',
+                    // headers: { 'Authorization': 'Bearer ' + token }
+                });
+                
+                if (response.ok) {
+                    await Swal.fire(
+                        'Deleted!',
+                        'Subcategory has been deleted.',
+                        'success'
+                    );
+                    window.location.href = '/subcategories';
+                } else {
+                    const data = await response.json();
+                    Swal.fire(
+                        'Error!',
+                        data.message || 'Failed to delete subcategory',
+                        'error'
+                    );
+                }
+            } catch (err) {
+                console.error(err);
+                Swal.fire(
+                    'Error!',
+                    'An error occurred',
+                    'error'
+                );
+            }
+        }
+    }
+    </script>
+</body>
+</html>

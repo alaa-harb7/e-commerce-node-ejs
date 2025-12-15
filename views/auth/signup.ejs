@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - TOPICO</title>
+    <link rel="stylesheet" href="/css/topico-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Section -->
+    <!-- Header Section -->
+    <%- include('../partials/topico-header') %>
+
+    <!-- Navigation Bar -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="/" class="nav-link">HOME</a>
+            <a href="/products?showAll=true" class="nav-link">ALL PRODUCTS</a>
+            <a href="/about" class="nav-link">ABOUT US</a>
+            <a href="/contact" class="nav-link">CONTACT</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <h2><i class="fas fa-user-plus"></i> Create Your Account</h2>
+                    <p>Join TOPICO today and start shopping amazing products!</p>
+                </div>
+                <form action="/api/v1/auth/signup" method="POST" id="signupForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="name">
+                            <i class="fas fa-user"></i> Full Name
+                        </label>
+                        <input type="text" id="name" name="name" class="form-input" placeholder="Enter your full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">
+                            <i class="fas fa-envelope"></i> Email Address
+                        </label>
+                        <input type="email" id="email" name="email" class="form-input" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">
+                            <i class="fas fa-lock"></i> Password
+                        </label>
+                        <input type="password" id="password" name="password" class="form-input" placeholder="Create a password (min. 6 characters)" minlength="6" required>
+                        <small class="form-hint">Password must be at least 6 characters long</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">
+                            <i class="fas fa-lock"></i> Confirm Password
+                        </label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" class="form-input" placeholder="Confirm your password" minlength="6" required>
+                        <small class="form-hint" id="passwordMatchHint"></small>
+                    </div>
+                    <button type="submit" class="auth-submit-btn">
+                        <i class="fas fa-user-plus"></i> Sign Up
+                    </button>
+                </form>
+                <div class="auth-footer">
+                    <p>Already have an account? <a href="/auth/login">Login Here</a></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Password match validation
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirmPassword');
+        const passwordMatchHint = document.getElementById('passwordMatchHint');
+
+        function checkPasswordMatch() {
+            if (confirmPassword.value === '') {
+                passwordMatchHint.textContent = '';
+                confirmPassword.style.borderColor = '#e5e5e5';
+                return true;
+            }
+            if (password.value !== confirmPassword.value) {
+                passwordMatchHint.textContent = 'Passwords do not match';
+                passwordMatchHint.style.color = '#dc3545';
+                confirmPassword.style.borderColor = '#dc3545';
+                return false;
+            } else {
+                passwordMatchHint.textContent = 'Passwords match';
+                passwordMatchHint.style.color = '#28a745';
+                confirmPassword.style.borderColor = '#28a745';
+                return true;
+            }
+        }
+
+        password.addEventListener('input', checkPasswordMatch);
+        confirmPassword.addEventListener('input', checkPasswordMatch);
+
+        document.getElementById('signupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Validate password match before submitting
+            if (!checkPasswordMatch()) {
+                alert('Passwords do not match. Please check and try again.');
+                return;
+            }
+
+            const formData = new FormData(this);
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+            
+            try {
+                const response = await fetch('/api/v1/auth/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(Object.fromEntries(formData))
+                });
+                const data = await response.json();
+                
+                if (response.ok) {
+                    window.location.href = '/auth/login';
+                } else {
+                    // Display validation errors if any
+                    let errorMessage = data.message || 'Signup failed. Please try again.';
+                    if (data.errors && Array.isArray(data.errors)) {
+                        errorMessage = data.errors.map(err => err.msg || err.message || err).join('\n');
+                    } else if (data.error) {
+                        errorMessage = data.error;
+                    }
+                    alert(errorMessage);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            } catch (error) {
+                alert('An error occurred. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+    </script>
+</body>
+</html>
