@@ -21,4 +21,12 @@ const cartShema = new mongoose.Schema({
   totalPriceAfterDiscount: Number 
 })
 
+cartShema.pre(/^find/, function (next) {
+  this.populate({
+    path: "cartItems.product",
+    select: "title imageCover price quantity", // The fields you want to show
+  });
+  next();
+});
+
 module.exports = mongoose.model("Cart", cartShema)

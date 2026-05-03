@@ -21,7 +21,7 @@ const brandSchema = new mongoose.Schema(
 // for updateOne, getOne, getAll
 brandSchema.post("init", (doc) => {
   // return image base url + image name
-  if (doc.image) {
+  if (doc.image && !doc.image.startsWith('http://') && !doc.image.startsWith('https://')) {
     doc.image = `${process.env.BASE_URL}/brands/${doc.image}`;
   }
 });
@@ -29,7 +29,7 @@ brandSchema.post("init", (doc) => {
 // for create
 brandSchema.post("save", (doc) => {
   // return image base url + image name
-  if (doc.image) {
+  if (doc.image && !doc.image.startsWith('http://') && !doc.image.startsWith('https://')) {
     doc.image = `${process.env.BASE_URL}/brands/${doc.image}`;
   }
 });

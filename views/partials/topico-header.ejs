@@ -26,7 +26,7 @@
                     <span class="cart-badge"><%= (typeof cart !== 'undefined' && cart && cart.cartItems) ? cart.cartItems.length : 0 %></span>
                     <div class="cart-info">
                         <span class="cart-label">My Cart</span>
-                        <span class="cart-price">$<%= (typeof cart !== 'undefined' && cart) ? (cart.totalPriceAfterDiscount !== undefined ? cart.totalPriceAfterDiscount : cart.totalCartPrice) : 0 %></span>
+                        <span class="cart-price">$<%= (typeof cart !== 'undefined' && cart && cart.cartItems && cart.cartItems.length > 0) ? (cart.totalPriceAfterDiscount !== undefined ? cart.totalPriceAfterDiscount : cart.totalCartPrice) : 0 %></span>
                     </div>
                 </a>
                 <% if (typeof user !== 'undefined' && user) { %>

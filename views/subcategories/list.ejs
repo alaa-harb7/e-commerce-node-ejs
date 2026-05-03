@@ -37,6 +37,13 @@
             margin-right: 5px;
             display: inline-block;
         }
+        .fa-edit{
+            display: flex;
+    align-items: center;
+    height: 100%;
+    justify-content: center;
+        }
+
         .btn-edit { background-color: #ffc107; color: #000; }
         .btn-delete { background-color: #dc3545; color: #fff; }
     </style>
@@ -89,8 +96,8 @@
                                 <td><%= sub.category ? sub.category.name : 'No Category' %></td>
                                 <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
                                     <td>
-                                        <a href="/subcategories/<%= sub._id %>/edit" class="action-btn btn-edit"><i class="fas fa-edit"></i> Edit</a>
-                                        <button class="action-btn btn-delete" style="border:none; cursor:pointer;" onclick="deleteSubCategory('<%= sub._id %>')"><i class="fas fa-trash"></i> Delete</button>
+                                        <a href="/subcategories/<%= sub._id %>/edit" class="action-btn btn-edit"><i class="fas fa-edit"></i> </a>
+                                        <button class="action-btn btn-delete" style="border:none; cursor:pointer;" onclick="deleteSubCategory('<%= sub._id %>')"><i class="fas fa-trash"></i> </button>
                                     </td>
                                 <% } %>
                             </tr>

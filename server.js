@@ -1,11 +1,11 @@
 const path = require("path");
 
 const express = require("express");
-const cors = require("cors")
+const cors = require("cors");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
-const compression = require("compression")
+const compression = require("compression");
 
 dotenv.config({ path: "config.env" });
 const ApiError = require("./utils/apiError");
@@ -25,6 +25,7 @@ const addressRoute = require("./routes/address.route");
 const couponRoute = require("./routes/coupon.route");
 const cartRoute = require("./routes/cart.route");
 const orderRoute = require("./routes/order.route");
+const messageRoute = require("./routes/message.route");
 
 // Connect to DB
 const connectDB = require("./config/db");
@@ -34,12 +35,16 @@ connectDB();
 // Express app
 const app = express();
 
-// CROS 
-app.use(cors())
-app.options(/.*/, cors())
+// CROS
+app.use(
+  cors({
+    origin: "http://localhost:4200",
+    credentials: true,
+  })
+);
 
 // Compression all response
-app.use(compression())
+app.use(compression());
 
 // View engine setup
 app.set("view engine", "ejs");
@@ -58,7 +63,7 @@ if (process.env.NODE_ENV === "development") {
 }
 
 // View Routes (must be before API routes to avoid conflicts)
-const viewRoutes = require("./routes/viewRoutes");
+const viewRoutes = require("./routes/views");
 
 app.use("/", viewRoutes);
 
@@ -75,6 +80,7 @@ app.use("/api/v1/addresses", addressRoute);
 app.use("/api/v1/coupons", couponRoute);
 app.use("/api/v1/cart", cartRoute);
 app.use("/api/v1/orders", orderRoute);
+app.use("/api/v1/messages", messageRoute);
 
 app.all(/.*/, (req, res, next) => {
   next(new ApiError(`Can't find this route: ${req.originalUrl}`, 400));
@@ -82,19 +88,17 @@ app.all(/.*/, (req, res, next) => {
 
 app.use(globalError);
 
-// const port = process.env.PORT || 8000;
-// const server = app.listen(port, () =>
-//   console.log(`The Server is Running on http://localhost:${port}`)
-// );
-
-module.exports = app;
+const port = process.env.PORT || 8000;
+const server = app.listen(port, () =>
+  console.log(`The Server is Running on http://localhost:${port}`)
+);
 
 // Initialize Socket.IO
-require("./utils/socketHandler")(app);
+require("./utils/socketHandler")(server);
 
 // Handle Rejections outside Express
 process.on("unhandledRejection", (err) => {
   console.log(`UnhandleRejection Error: ${err.name} ${err.message}`);
 
-  app.close(() => process.exit(1));
+  server.close(() => process.exit(1));
 });

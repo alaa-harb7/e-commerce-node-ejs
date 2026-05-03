@@ -15,7 +15,8 @@ const {
 const uploadProductImage = uploadSingleAndMultiImage("imageCover", "images");
 
 const resizeProductImage = asyncHandler(async (req, res, next) => {
-  if (req.files.imageCover) {
+  // Only update imageCover if new file is uploaded
+  if (req.files.imageCover && req.files.imageCover.length > 0) {
     const filename = `product-${uuidv4()}-cover.jpeg`;
     await sharp(req.files.imageCover[0].buffer)
       .resize(3000, 2000)
@@ -25,7 +26,8 @@ const resizeProductImage = asyncHandler(async (req, res, next) => {
     req.body.imageCover = filename;
   }
 
-  if (req.files.images) {
+  // Only update images array if new files are uploaded
+  if (req.files.images && req.files.images.length > 0) {
     req.body.images = [];
     await Promise.all(
       req.files.images.map(async (file, index) => {

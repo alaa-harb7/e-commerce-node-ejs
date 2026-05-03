@@ -94,12 +94,12 @@ productSchema.pre(/^find/, function (next) {
 // for updateOne, getOne, getAll
 productSchema.post("init", (doc) => {
   // return image base url + image name
-  if (doc.imageCover) {
+  if (doc.imageCover && !doc.imageCover.startsWith('http://') && !doc.imageCover.startsWith('https://')) {
     doc.imageCover = `${process.env.BASE_URL}/products/${doc.imageCover}`;
   }
   if (doc.images) {
     doc.images = doc.images.map(
-      (image) => `${process.env.BASE_URL}/products/${image}`
+      (image) => image.startsWith('http://') || image.startsWith('https://') ? image : `${process.env.BASE_URL}/products/${image}`
     );
   }
 });
@@ -107,12 +107,12 @@ productSchema.post("init", (doc) => {
 // for create
 productSchema.post("save", (doc) => {
   // return image base url + image name
-  if (doc.imageCover) {
+  if (doc.imageCover && !doc.imageCover.startsWith('http://') && !doc.imageCover.startsWith('https://')) {
     doc.imageCover = `${process.env.BASE_URL}/products/${doc.imageCover}`;
   }
   if (doc.images) {
     doc.images = doc.images.map(
-      (image) => `${process.env.BASE_URL}/products/${image}`
+      (image) => image.startsWith('http://') || image.startsWith('https://') ? image : `${process.env.BASE_URL}/products/${image}`
     );
   }
 });

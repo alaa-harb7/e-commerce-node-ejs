@@ -24,7 +24,7 @@ const categorySchema = new mongoose.Schema(
 // for updateOne, getOne, getAll
 categorySchema.post("init", (doc) => {
   // return image base url + image name
-  if (doc.image) {
+  if (doc.image && !doc.image.startsWith('http://') && !doc.image.startsWith('https://')) {
     doc.image = `${process.env.BASE_URL}/categories/${doc.image}`;
   }
 })
@@ -32,7 +32,7 @@ categorySchema.post("init", (doc) => {
 // for create
 categorySchema.post("save", (doc) => {
   // return image base url + image name
-  if (doc.image) {
+  if (doc.image && !doc.image.startsWith('http://') && !doc.image.startsWith('https://')) {
     doc.image = `${process.env.BASE_URL}/categories/${doc.image}`;
   }
 })
